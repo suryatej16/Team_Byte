@@ -9,30 +9,35 @@ void Buddhabrot::gen_fractal()
   double MinRe = -2.5;
   double MaxRe = 1.0;
   double MinIm = -1.0;
+  double MaxIm = 1.0;
   int height = get_height();
   int width = get_width();
-  double MaxIm = MinIm+(MaxRe-MinRe)*height/width;
   double Re_factor = (MaxRe-MinRe)/(width-1);
   double Im_factor = (MaxIm-MinIm)/(height-1);
   int num_pixels = height*width;
-  int outer_array[num_pixels];
+  int * outer_array;
+  outer_array = new int[num_pixels];
+  for (int bucket = 0; bucket < num_pixels; bucket++)
+	  outer_array[bucket] = 0;
+  int * temp_array;
+  temp_array = new int[num_pixels];
   for(int i = 0; i < (10*num_pixels); i++)
     {
+	  for (int bucket = 0; bucket < num_pixels; bucket++)
+		  temp_array[bucket] = 0;
       int num = rand() % num_pixels;
-      int temp_array[num_pixels];
       int x = num%height;
       int y = num/height;
+	  double c_re = MinRe+x*Re_factor;
       double c_im = MaxIm-y*Im_factor;
-      double c_re = MinRe+x*Re_factor;
-      double Z_re, Z_im = 0;
+      double Z_re = 0;
+      double Z_im = 0;
       bool isInside = true;
-      int iter = 0;
-      for(iter; iter < MAXITER; iter++)
+      for(int iter = 0; iter < MAXITER; iter++)
 	{
 	  if((Z_re*Z_re + Z_im*Z_im) > 4)
 	    {
 	      isInside = false;
-	      temp_array[num]++;
 	      break;
 	    }
 	  double Z_im2 = Z_im*Z_im;
@@ -42,11 +47,13 @@ void Buddhabrot::gen_fractal()
 	}
       if(isInside == false)
 	{
-	  outer_array[num] += temp_array[num];
+	  for (int pos = 0; pos < num_pixels; pos++)
+		  outer_array[pos] += temp_array[pos];
 	}
     }
+  delete [] temp_array;
   int temp;
-  // #pragma omp parallel for
+  #pragma omp parallel for
   for(int i = 0; i < num_pixels; i++)
     {
       if(i == 0)
@@ -59,7 +66,7 @@ void Buddhabrot::gen_fractal()
 	  temp = outer_array[i];
 	}
     }
-  // #pragma omp parallel for
+  #pragma omp parallel for
   for(int k = 0; k < num_pixels; k++)
     {
       int x = k%height;
@@ -71,8 +78,7 @@ void Buddhabrot::gen_fractal()
       m_bitmap[x*height*4 + y*4 + 2] = pow((double(outer_array[k]))/MAXITER, 0.10)*255;
       m_bitmap[x*height*4 + y*4 + 3] = 255;
     }
-      
-  
+  delete [] outer_array;
 }
    
 	// Real (-2.5, 1)
