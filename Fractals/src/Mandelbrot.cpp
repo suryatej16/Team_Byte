@@ -3,6 +3,37 @@
 
 void Mandelbrot::gen_fractal()
 {
+  /* int width = get_width(), height = get_height();
+  const int NUM_PIXELS = width * height;
+
+  for(int i = 0; i < NUM_PIXELS; i++) {
+    int x = i % height;
+    int y = i / height;
+    int iter = 0;
+    double c_r = (((double) x) / width) * 3.5 - 2.5;
+    double c_i = (((double) y) / height) * 2 - 1;
+    double z_r = 0, z_i = 0;
+    double z_temp;
+
+    for(iter; iter < MAXITER; iter++) {
+      //Real component is a^2 - b^2
+      z_temp = pow(z_r, 2.0) - pow(z_i, 2.0) + c_r;
+      //Imaginary component is -2abi but drop the negative since we're taking magnitude
+      z_i = 2 * z_r * z_i + c_i;
+      z_r = z_temp;
+
+      //If Z escapes to infinity, it is not part of the Mandelbrot set
+      if(pow(z_r, 2.0) + pow(z_i, 2.0) > 4) {
+	break;
+      }
+    }
+
+    //RGB respectively, when iter = MAXITER, the color will be white
+    m_bitmap[x * height * 4 + y * 4] = pow( ((double) iter) / MAXITER, 0.6) * 255;
+    m_bitmap[x * height * 4 + y * 4 + 1] = pow( ((double) iter) / MAXITER, 0.5) * 255;
+    m_bitmap[x * height * 4 + y * 4 + 2] = pow( ((double) iter) / MAXITER, 0.4) * 255;
+    m_bitmap[x * height * 4 + y * 4 + 3] = 255;
+    }*/
   double MinRe = -2.5;
   double MaxRe = 1.0;
   double MinIm = -1.0;
@@ -18,11 +49,11 @@ void Mandelbrot::gen_fractal()
       for(int j = 0; j < width; j++)
 	{
 	  double c_re = MinRe + j*Re_factor;
-	  double Z_re = c_re;
-	  double Z_im = c_im;
+	  double Z_re = 0;
+	  double Z_im = 0;
 	  bool isInside = true;
 	  int iter = 0;
-	  for(int n = 0; n < MAXITER; n++)
+	  for(int n = 1; n < MAXITER; n++)
 	    {
 	      if((Z_re*Z_re + Z_im*Z_im) > 4)
 		{
@@ -36,10 +67,17 @@ void Mandelbrot::gen_fractal()
 	    }
 	  if(isInside == false)
 	    {
-	      m_bitmap[i*height*4 + j*4] = pow(double(iter/MAXITER),0.6)*255;
-	      m_bitmap[i*height*4 + j*4 + 1] = pow(double(iter/MAXITER),0.5)*255;
-	      m_bitmap[i*height*4 + j*4 + 2] = pow(double(iter/MAXITER), 0.4)*255;
-	      m_bitmap[i*height*4 + j*4 + 3] = 255;
+	      m_bitmap[j*height*4 + i*4] = pow( (double(iter))/MAXITER,0.6)*255;
+	      m_bitmap[j*height*4 + i*4 + 1] = pow((double(iter))/MAXITER,0.5)*255;
+	      m_bitmap[j*height*4 + i*4 + 2] = pow((double(iter))/MAXITER, 0.4)*255;
+	      m_bitmap[j*height*4 + i*4 + 3] = 255;
+	    }
+	  else
+	    {
+	      m_bitmap[j*height*4 + i*4] = 0;
+	      m_bitmap[j*height*4 + i*4 + 1] = 0;
+	      m_bitmap[j*height*4 + i*4 + 2] = 0;
+	      m_bitmap[j*height*4 + i*4 + 3] = 255;
 	    }
 	}
     }
