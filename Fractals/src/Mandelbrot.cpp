@@ -36,9 +36,9 @@ void Mandelbrot::gen_fractal()
 	    }
 	  if(isInside == false)
 	    {
-	      m_bitmap[j*height*4 + i*4] = pow( (double(iter))/MAXITER,0.65)*255;
-	      m_bitmap[j*height*4 + i*4 + 1] = pow((double(iter))/MAXITER,0.55)*255;
-	      m_bitmap[j*height*4 + i*4 + 2] = pow((double(iter))/MAXITER, 0.45)*255;
+	      m_bitmap[j*height*4 + i*4] = pow( (double(iter))/MAXITER,0.60)*255;
+	      m_bitmap[j*height*4 + i*4 + 1] = pow((double(iter))/MAXITER,0.40)*255;
+	      m_bitmap[j*height*4 + i*4 + 2] = pow((double(iter))/MAXITER, 0.10)*255;
 	      m_bitmap[j*height*4 + i*4 + 3] = 255;
 	    }
 	  else
@@ -51,6 +51,7 @@ void Mandelbrot::gen_fractal()
 	}
     }
   int num_pixels = height*width;
+  #pragma omp parallel for
   for(int i = 0; i < num_pixels; i++)
     {
       int x = i%height;
