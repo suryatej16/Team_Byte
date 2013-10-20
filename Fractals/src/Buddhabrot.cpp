@@ -5,7 +5,7 @@ using namespace std;
 
 void Buddhabrot::gen_fractal()
 {
-  srand (time(NULL));
+  //srand (time(NULL));
   double MinRe = -2.5;
   double MaxRe = 1.0;
   double MinIm = -1.0;
@@ -46,7 +46,7 @@ void Buddhabrot::gen_fractal()
 	}
     }
   int temp;
-  #pragma omp parallel for
+  // #pragma omp parallel for
   for(int i = 0; i < num_pixels; i++)
     {
       if(i == 0)
@@ -59,11 +59,11 @@ void Buddhabrot::gen_fractal()
 	  temp = outer_array[i];
 	}
     }
-  #pragma omp parallel for
+  // #pragma omp parallel for
   for(int k = 0; k < num_pixels; k++)
     {
       int x = k%height;
-      int y =k/height;
+      int y = k/height;
       int temp2 = outer_array[k];
       outer_array[k] = temp2/temp;
       m_bitmap[x*height*4 + y*4] = pow( (double(outer_array[k]))/MAXITER,0.60)*255;
