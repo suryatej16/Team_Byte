@@ -3,38 +3,7 @@
 
 void Mandelbrot::gen_fractal()
 {
-  int width = get_width(), height = get_height();
-  const int NUM_PIXELS = width * height;
-
-  for(int i = 0; i < NUM_PIXELS; i++) {
-    int x = i % height;
-    int y = i / height;
-    int iter = 0;
-    double c_r = (((double) x) / width) * 3.5 - 2.5;
-    double c_i = (((double) y) / height) * 2 - 1;
-    double z_r = 0, z_i = 0;
-    double z_temp;
-
-    for(iter; iter < MAXITER; iter++) {
-      //Real component is a^2 - b^2
-      z_temp = pow(z_r, 2.0) - pow(z_i, 2.0) + c_r;
-      //Imaginary component is -2abi but drop the negative since we're taking magnitude
-      z_i = 2 * z_r * z_i + c_i;
-      z_r = z_temp;
-
-      //If Z escapes to infinity, it is not part of the Mandelbrot set
-      if(pow(z_r, 2.0) + pow(z_i, 2.0) > 4) {
-	break;
-      }
-    }
-
-    //RGB respectively, when iter = MAXITER, the color will be white
-    m_bitmap[x * height * 4 + y * 4] = pow( ((double) iter) / MAXITER, 0.6) * 255;
-    m_bitmap[x * height * 4 + y * 4 + 1] = pow( ((double) iter) / MAXITER, 0.5) * 255;
-    m_bitmap[x * height * 4 + y * 4 + 2] = pow( ((double) iter) / MAXITER, 0.4) * 255;
-    m_bitmap[x * height * 4 + y * 4 + 3] = 255;
-  }
-  /*  double MinRe = -2.5;
+  double MinRe = -2.5;
   double MaxRe = 1.0;
   double MinIm = -1.0;
   int height = get_height();
@@ -67,9 +36,9 @@ void Mandelbrot::gen_fractal()
 	    }
 	  if(isInside == false)
 	    {
-	      m_bitmap[j*height*4 + i*4] = pow((iter/MAXITER),0.6)*255;
-	      m_bitmap[j*height*4 + i*4 + 1] = pow((iter/MAXITER),0.5)*255;
-	      m_bitmap[j*height*4 + i*4 + 2] = pow((iter/MAXITER), 0.4)*255;
+	      m_bitmap[j*height*4 + i*4] = pow( (double(iter))/MAXITER,0.8)*255;
+	      m_bitmap[j*height*4 + i*4 + 1] = pow((double(iter))/MAXITER,0.7)*255;
+	      m_bitmap[j*height*4 + i*4 + 2] = pow((double(iter))/MAXITER, 0.6)*255;
 	      m_bitmap[j*height*4 + i*4 + 3] = 255;
 	    }
 	  else
@@ -80,8 +49,25 @@ void Mandelbrot::gen_fractal()
 	      m_bitmap[j*height*4 + i*4 + 3] = 255;
 	    }
 	}
-	}*/
-}
+    }
+  int num_pixels = height*width;
+  for(int i = 0; i < num_pixels; i++)
+    {
+      int x = i%height;
+      int y = i/height;
+      if((x-1) >= 0 && (y-1) >=0 && (x+1) < width && (y+1) < height)
+	{
+	  double temp1 = ( m_bitmap[(x+1)*height*4 + y*4]+ m_bitmap[(x-1)*height*4 + y*4] +  m_bitmap[x*height*4 + (y-1)*4] +  m_bitmap[x*height*4 + (y+1)*4])/4;
+	  m_bitmap[x*height*4 + y*4] = temp1;
+
+	  double temp2 = ( m_bitmap[(x+1)*height*4 + y*4 + 1]+ m_bitmap[(x-1)*height*4 + y*4 + 1] +  m_bitmap[x*height*4 + (y-1)*4 + 1] +  m_bitmap[x*height*4 + (y+1)*4 + 1])/4;
+	  m_bitmap[x*height*4 + y*4 + 1] = temp2;
+	  
+	  double temp3 = ( m_bitmap[(x+1)*height*4 + y*4 + 2]+ m_bitmap[(x-1)*height*4 + y*4 + 2] +  m_bitmap[x*height*4 + (y-1)*4 + 2] +  m_bitmap[x*height*4 + (y+1)*4 + 2])/4;
+	  m_bitmap[x*height*4 + y*4 + 2] = temp3;
+	}
+    }
+}  
   
 	// Real (-2.5, 1)
 	// Imaginary (-1, 1)
