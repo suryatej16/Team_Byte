@@ -3,12 +3,12 @@
 
 void Mandelbrot::gen_fractal()
 {
-  double MinRe = -2.5;
-  double MaxRe = 1.0;
-  double MinIm = -1.0;
+  double MinRe = -2.25;
+  double MaxRe = 0.75;
+  double MinIm = -1.50;
+  double MaxIm = 1.50;
   int height = get_height();
   int width = get_width();
-  double MaxIm = MinIm+(MaxRe-MinRe)*height/width;
   double Re_factor = (MaxRe-MinRe)/(width-1);
   double Im_factor = (MaxIm-MinIm)/(height-1);
   #pragma omp parallel for
@@ -36,17 +36,17 @@ void Mandelbrot::gen_fractal()
 	    }
 	  if(isInside == false)
 	    {
-	      m_bitmap[j*height*4 + i*4] = pow( (double(iter))/MAXITER,0.60)*255;
-	      m_bitmap[j*height*4 + i*4 + 1] = pow((double(iter))/MAXITER,0.40)*255;
-	      m_bitmap[j*height*4 + i*4 + 2] = pow((double(iter))/MAXITER, 0.10)*255;
-	      m_bitmap[j*height*4 + i*4 + 3] = 255;
+	      m_bitmap[i*height*4 + j*4] = pow( (double(iter))/MAXITER,0.60)*255;
+	      m_bitmap[i*height*4 + j*4 + 1] = pow((double(iter))/MAXITER,0.40)*255;
+	      m_bitmap[i*height*4 + j*4 + 2] = pow((double(iter))/MAXITER, 0.10)*255;
+	      m_bitmap[i*height*4 + j*4 + 3] = 255;
 	    }
 	  else
 	    {
-	      m_bitmap[j*height*4 + i*4] = 0;
-	      m_bitmap[j*height*4 + i*4 + 1] = 0;
-	      m_bitmap[j*height*4 + i*4 + 2] = 0;
-	      m_bitmap[j*height*4 + i*4 + 3] = 255;
+	      m_bitmap[i*height*4 + j*4] = 0;
+	      m_bitmap[i*height*4 + j*4 + 1] = 0;
+	      m_bitmap[i*height*4 + j*4 + 2] = 0;
+	      m_bitmap[i*height*4 + j*4 + 3] = 255;
 	    }
 	}
     }
@@ -69,21 +69,3 @@ void Mandelbrot::gen_fractal()
 	}
     }
 }  
-  
-	// Real (-2.5, 1)
-	// Imaginary (-1, 1)
-    
-    // Iterate over each pixel and determine the corresponding complex coordinate (or several complex coordinates if you're anti-aliasing)
-    
-
-        // For each pixel, compute the corresponding complex coordinate C (or multiple sub-coordinates, for AA)   
-
-        // let z_r and z_i be 0
-        // Begin iterating... while z is not infinity and not too many iterations have passed...
-        
-            // Z = Z^2 + C
-            // increment an iteration counter
-
-        // Color each pixel...
-
-
