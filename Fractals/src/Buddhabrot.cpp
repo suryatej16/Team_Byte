@@ -5,7 +5,8 @@ using namespace std;
 
 void Buddhabrot::gen_fractal()
 {
-  //srand (time(NULL));
+  
+  srand (time(0));
   double MinRe = -2.5;
   double MaxRe = 1.0;
   double MinIm = -1.0;
@@ -15,43 +16,54 @@ void Buddhabrot::gen_fractal()
   double Re_factor = (MaxRe-MinRe)/(width-1);
   double Im_factor = (MaxIm-MinIm)/(height-1);
   int num_pixels = height*width;
-  int * outer_array;
-  outer_array = new int[num_pixels];
+  //cout << num_pixels << endl;
+  int  outer_array[num_pixels];
+  //outer_array = new int[num_pixels];
   for (int bucket = 0; bucket < num_pixels; bucket++)
 	  outer_array[bucket] = 0;
-  int * temp_array;
-  temp_array = new int[num_pixels];
-  for(int i = 0; i < (10*num_pixels); i++)
+  //int * temp_array;
+  //temp_array = new int[num_pixels];
+  int temp_array[num_pixels];
+  for(int i = 0; i < (2*num_pixels); i++)
     {
-	  for (int bucket = 0; bucket < num_pixels; bucket++)
-		  temp_array[bucket] = 0;
+      for (int bucket = 0; bucket < num_pixels; bucket++)
+	{
+	  temp_array[bucket] = 0;
+	}
+      // int temp_bucket[num_pixels];
       int num = rand() % num_pixels;
+      //cout << num << endl;
       int x = num%height;
       int y = num/height;
-	  double c_re = MinRe+x*Re_factor;
+      double c_re = MinRe+x*Re_factor;
       double c_im = MaxIm-y*Im_factor;
       double Z_re = 0;
       double Z_im = 0;
       bool isInside = true;
       for(int iter = 0; iter < MAXITER; iter++)
 	{
-	  if((Z_re*Z_re + Z_im*Z_im) > 4)
+	  double Z_im2 = Z_im*Z_im;
+	  double Z_re2 = Z_re*Z_re;
+	  int a = (int)((Z_re-Z_re2+Z_im2-MinRe)/Re_factor);
+	  int b = (int)((Z_im-2*Z_re*Z_im-MaxIm)/(-1*Im_factor));
+	  if((Z_re2 + Z_im2) > 4)
 	    {
 	      isInside = false;
 	      break;
 	    }
-	  double Z_im2 = Z_im*Z_im;
 	  Z_im = 2*Z_re*Z_im+c_im;
-	  Z_re= Z_re*Z_re-Z_im2+c_re;
-	  temp_array[num]++;
+	  Z_re= Z_re2-Z_im2+c_re;
+	  temp_array[(a+b)]++;
 	}
       if(isInside == false)
 	{
 	  for (int pos = 0; pos < num_pixels; pos++)
-		  outer_array[pos] += temp_array[pos];
+	    {
+	      outer_array[pos] += temp_array[pos];
+	    }
 	}
     }
-  delete [] temp_array;
+  //delete [] temp_array;
   int temp;
   #pragma omp parallel for
   for(int i = 0; i < num_pixels; i++)
@@ -67,18 +79,26 @@ void Buddhabrot::gen_fractal()
 	}
     }
   #pragma omp parallel for
-  for(int k = 0; k < num_pixels; k++)
+  for(int i = 0; i < num_pixels; i++)
+    {
+      outer_array[i] /= temp;
+      m_bitmap[i*4] = (int) (outer_array[i]*255);
+      m_bitmap[i*4 + 1] = (int) (outer_array[i]*51);
+      m_bitmap[i*4 + 2] = (int) (outer_array[i]*51);
+      m_bitmap[i*4+3] = 255;
+    }
+  /*for(int k = 0; k < num_pixels; k++)
     {
       int x = k%height;
       int y = k/height;
       int temp2 = outer_array[k];
       outer_array[k] = temp2/temp;
-      m_bitmap[x*height*4 + y*4] = pow( (double(outer_array[k]))/MAXITER,0.60)*255;
-      m_bitmap[x*height*4 + y*4 + 1] = pow((double(outer_array[k]))/MAXITER,0.40)*255;
-      m_bitmap[x*height*4 + y*4 + 2] = pow((double(outer_array[k]))/MAXITER, 0.10)*255;
+      m_bitmap[x*height*4 + y*4] = pow( (double(outer_array[k]))/(2*MAXITER),0.60)*255;
+      m_bitmap[x*height*4 + y*4 + 1] = pow((double(outer_array[k]))/(2*MAXITER),0.40)*255;
+      m_bitmap[x*height*4 + y*4 + 2] = pow((double(outer_array[k]))/(2*MAXITER), 0.30)*255;
       m_bitmap[x*height*4 + y*4 + 3] = 255;
-    }
-  delete [] outer_array;
+      }*/
+  //delete [] outer_array;
 }
    
 	// Real (-2.5, 1)
