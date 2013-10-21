@@ -34,11 +34,12 @@ void Mandelbrot::gen_fractal()
 	      Z_im = 2*Z_re*Z_im + c_im;
 	      Z_re = Z_re*Z_re - Z_im2 + c_re;
 	    }
+	  double mu = iter - log(log(sqrt(pow(Z_re, 2) + pow(Z_im, 2)))) / log(2.0);
 	  if(isInside == false)
 	    {
-	      m_bitmap[i*height*4 + j*4] = pow( (double(iter))/MAXITER,0.60)*255;
-	      m_bitmap[i*height*4 + j*4 + 1] = pow((double(iter))/MAXITER,0.40)*255;
-	      m_bitmap[i*height*4 + j*4 + 2] = pow((double(iter))/MAXITER, 0.10)*255;
+	      m_bitmap[i*height*4 + j*4] = pow(mu/MAXITER,.60)*255;
+	      m_bitmap[i*height*4 + j*4 + 1] = pow(mu/MAXITER,.40)*255;
+	      m_bitmap[i*height*4 + j*4 + 2] = pow(mu/MAXITER,.30)*255;
 	      m_bitmap[i*height*4 + j*4 + 3] = 255;
 	    }
 	  else
