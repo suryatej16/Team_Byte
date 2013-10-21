@@ -5,26 +5,25 @@ using namespace std;
 
 void Buddhabrot::gen_fractal()
 {
-  
-  srand (time(0));
-  double MinRe = -2.5;
-  double MaxRe = 1.0;
-  double MinIm = -1.0;
-  double MaxIm = 1.0;
+  srand (time(NULL));
+  double MinRe = -2.25;
+  double MaxRe = 0.75;
+  double MinIm = -1.50;
+  double MaxIm = 1.50;
   int height = get_height();
   int width = get_width();
   double Re_factor = (MaxRe-MinRe)/(width-1);
   double Im_factor = (MaxIm-MinIm)/(height-1);
   int num_pixels = height*width;
+  int * outer_array;
   //cout << num_pixels << endl;
-  int  outer_array[num_pixels];
-  //outer_array = new int[num_pixels];
+  outer_array = new int[num_pixels];
   for (int bucket = 0; bucket < num_pixels; bucket++)
 	  outer_array[bucket] = 0;
-  //int * temp_array;
-  //temp_array = new int[num_pixels];
-  int temp_array[num_pixels];
-  for(int i = 0; i < (2*num_pixels); i++)
+  int * temp_array;
+  temp_array = new int[num_pixels];
+  #pragma omp parallel for
+  for(int i = 0; i < (10*num_pixels); i++)
     {
       for (int bucket = 0; bucket < num_pixels; bucket++)
 	{
@@ -44,8 +43,6 @@ void Buddhabrot::gen_fractal()
 	{
 	  double Z_im2 = Z_im*Z_im;
 	  double Z_re2 = Z_re*Z_re;
-	  int a = (int)((Z_re-Z_re2+Z_im2-MinRe)/Re_factor);
-	  int b = (int)((Z_im-2*Z_re*Z_im-MaxIm)/(-1*Im_factor));
 	  if((Z_re2 + Z_im2) > 4)
 	    {
 	      isInside = false;
@@ -54,6 +51,9 @@ void Buddhabrot::gen_fractal()
 	  Z_im = 2*Z_re*Z_im+c_im;
 	  Z_re= Z_re2-Z_im2+c_re;
 	  temp_array[(a+b)]++;
+	  int array_pos = height * (MaxIm - Z_im) / Im_factor + (Z_re - MinRe) / Re_factor;
+	  if (array_pos >= 0 && array_pos < num_pixels)
+		temp_array[array_pos]++;
 	}
       if(isInside == false)
 	{
@@ -63,42 +63,30 @@ void Buddhabrot::gen_fractal()
 	    }
 	}
     }
-  //delete [] temp_array;
-  int temp;
+  delete [] temp_array;
+  double max;
   #pragma omp parallel for
   for(int i = 0; i < num_pixels; i++)
     {
       if(i == 0)
 	{
-	  temp = outer_array[0];
+	  max = outer_array[0];
 	  continue;
 	}
-      if(outer_array[i] > temp)
+      if(outer_array[i] > max)
 	{
-	  temp = outer_array[i];
+	  max = outer_array[i];
 	}
     }
   #pragma omp parallel for
   for(int i = 0; i < num_pixels; i++)
     {
-      outer_array[i] /= temp;
-      m_bitmap[i*4] = (int) (outer_array[i]*255);
-      m_bitmap[i*4 + 1] = (int) (outer_array[i]*51);
-      m_bitmap[i*4 + 2] = (int) (outer_array[i]*51);
-      m_bitmap[i*4+3] = 255;
+      m_bitmap[k*4] = (outer_array[k]/max)*255;
+      m_bitmap[k*4 + 1] = (outer_array[k]/max)*255;
+      m_bitmap[k*4 + 2] = (outer_array[k]/max)*255;
+      m_bitmap[k*4 + 3] = 255;
     }
-  /*for(int k = 0; k < num_pixels; k++)
-    {
-      int x = k%height;
-      int y = k/height;
-      int temp2 = outer_array[k];
-      outer_array[k] = temp2/temp;
-      m_bitmap[x*height*4 + y*4] = pow( (double(outer_array[k]))/(2*MAXITER),0.60)*255;
-      m_bitmap[x*height*4 + y*4 + 1] = pow((double(outer_array[k]))/(2*MAXITER),0.40)*255;
-      m_bitmap[x*height*4 + y*4 + 2] = pow((double(outer_array[k]))/(2*MAXITER), 0.30)*255;
-      m_bitmap[x*height*4 + y*4 + 3] = 255;
-      }*/
-  //delete [] outer_array;
+  delete [] outer_array;
 }
    
 	// Real (-2.5, 1)

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <time.h>
 #include <cstdlib>
-// #include "Mandelbrot.h"
+//#include "Mandelbrot.h"
 #include "Buddhabrot.h"
 using namespace std;
 
