@@ -10,7 +10,7 @@
 using namespace std;	
 
 
-const int MAXITER = 1100;
+const int MAXITER = 1000;
 const int SUBSAMPLING = 20;
 
 class Fractal
