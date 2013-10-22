@@ -73,7 +73,7 @@ void Buddhabrot::gen_fractal()
   for(int i = 0; i < (2*num_pixels); i++) {
 	  for (int bucket = 0; bucket < num_pixels; bucket++)
 		  temp_array[bucket] = 0;
-	  cout << i << endl;
+	  // cout << i << endl;
 	  int shift = -rand_mult + 1 + rand() % (2 * rand_mult - 1);
       int num = (rand() * rand_mult + shift) % num_pixels;
 	  /*if (mandel_set[num] == 1)

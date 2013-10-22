@@ -70,20 +70,6 @@ void Buddhabrot::gen_fractal()
   }
 
   #pragma omp parallel for
-<<<<<<< HEAD
-  for(int i = 0; i < (2*num_pixels); i++)
-    {
-      for (int bucket = 0; bucket < num_pixels; bucket++)
-	{
-	  temp_array[bucket] = 0;
-	}
-      // int temp_bucket[num_pixels];
-      int num = rand() % num_pixels;
-      //cout << num << endl;
-      int x = num%height;
-      int y = num/height;
-      double c_re = MinRe+x*Re_factor;
-=======
   for(int i = 0; i < (2*num_pixels); i++) {
 	  for (int bucket = 0; bucket < num_pixels; bucket++)
 		  temp_array[bucket] = 0;
@@ -95,37 +81,11 @@ void Buddhabrot::gen_fractal()
       int x = num%height;
       int y = num/height;
 
-	  double c_re = MinRe+x*Re_factor;
->>>>>>> 72aa3755e50cde239a3231ba0fbe843fff441446
+      double c_re = MinRe+x*Re_factor;
       double c_im = MaxIm-y*Im_factor;
       double Z_re = 0;
       double Z_im = 0;
       bool isInside = true;
-<<<<<<< HEAD
-      for(int iter = 0; iter < MAXITER; iter++)
-	{
-	  double Z_im2 = Z_im*Z_im;
-	  double Z_re2 = Z_re*Z_re;
-	  if((Z_re2 + Z_im2) > 4)
-	    {
-	      isInside = false;
-	      break;
-	    }
-	  Z_im = 2*Z_re*Z_im+c_im;
-	  Z_re= Z_re2-Z_im2+c_re;
-	  int array_pos = height * (MaxIm - Z_im) / Im_factor + (Z_re - MinRe) / Re_factor;
-	  if (array_pos >= 0 && array_pos < num_pixels)
-		temp_array[array_pos]++;
-	}
-      if(isInside == false)
-	{
-	  for (int pos = 0; pos < num_pixels; pos++)
-	    {
-	      outer_array[pos] += temp_array[pos];
-	    }
-	}
-    }
-=======
 
       for(int iter = 0; iter < MAXITER; iter++) {
 		  if((Z_re*Z_re + Z_im*Z_im) > 4) {
@@ -151,7 +111,6 @@ void Buddhabrot::gen_fractal()
 	  }
   }
 
->>>>>>> 72aa3755e50cde239a3231ba0fbe843fff441446
   delete [] temp_array;
   delete [] mandel_set;
   double max = outer_array[0];
