@@ -6,6 +6,7 @@ using namespace std;
 void Buddhabrot::gen_fractal()
 {
   srand (time(NULL));
+
   double MinRe = -2.25;
   double MaxRe = 0.75;
   double MinIm = -1.50;
@@ -14,97 +15,117 @@ void Buddhabrot::gen_fractal()
   int width = get_width();
   double Re_factor = (MaxRe-MinRe)/(width-1);
   double Im_factor = (MaxIm-MinIm)/(height-1);
+
   int num_pixels = height*width;
+  int rand_mult = ceil(num_pixels/double(RAND_MAX));
+
+  int * mandel_set;
+  mandel_set = new int[num_pixels];
   int * outer_array;
   outer_array = new int[num_pixels];
-  for (int bucket = 0; bucket < num_pixels; bucket++)
+  for (int bucket = 0; bucket < num_pixels; bucket++) {
+	  mandel_set[bucket] = 0;
 	  outer_array[bucket] = 0;
+  }
   int * temp_array;
   temp_array = new int[num_pixels];
+
   #pragma omp parallel for
-  for(int i = 0; i < (10*num_pixels); i++)
-    {
+  for(int i = 0; i < height; i++) {
+      double c_im = MaxIm - i*Im_factor;
+
+      for(int j = 0; j < width; j++) {
+		  double c_re = MinRe + j*Re_factor;
+		  double Z_re = 0;
+		  double Z_im = 0;
+		  double old_re = 0;
+		  double old_im = 0;
+		  bool isInside = true;
+		  int old_iter = 1;
+
+		  for(int n = 1; n <= MAXITER; n++) {
+              double Z_im2 = Z_im*Z_im;
+			  Z_im = 2*Z_re*Z_im + c_im;
+			  Z_re = Z_re*Z_re - Z_im2 + c_re;
+
+			  if((Z_re*Z_re + Z_im*Z_im) > 4) {
+				  isInside = false;
+				  break;
+			  }
+			  
+			  if((Z_re == old_re) && (Z_im == old_im))
+				  break;
+
+			  if(n == 2 * old_iter) {
+				  old_re = Z_re;
+				  old_im = Z_im;
+				  old_iter = n;
+			  }
+
+		  if (isInside == true)
+			  mandel_set[i*height + j] = 1;
+		  }
+	  }
+  }
+
+  #pragma omp parallel for
+  for(int i = 0; i < (2*num_pixels); i++) {
 	  for (int bucket = 0; bucket < num_pixels; bucket++)
 		  temp_array[bucket] = 0;
-      int num = rand() % num_pixels;
+	  cout << i << endl;
+	  int shift = -rand_mult + 1 + rand() % (2 * rand_mult - 1);
+      int num = (rand() * rand_mult + shift) % num_pixels;
+	  /*if (mandel_set[num] == 1)
+		  continue;*/
       int x = num%height;
       int y = num/height;
+
 	  double c_re = MinRe+x*Re_factor;
       double c_im = MaxIm-y*Im_factor;
       double Z_re = 0;
       double Z_im = 0;
       bool isInside = true;
-      for(int iter = 0; iter < MAXITER; iter++)
-	{
-	  if((Z_re*Z_re + Z_im*Z_im) > 4)
-	    {
-	      isInside = false;
-	      break;
-	    }
-	  double Z_im2 = Z_im*Z_im;
-	  Z_im = 2*Z_re*Z_im+c_im;
-	  Z_re= Z_re*Z_re-Z_im2+c_re;
-	  int array_pos = height * (MaxIm - Z_im) / Im_factor + (Z_re - MinRe) / Re_factor;
-	  if (array_pos >= 0 && array_pos < num_pixels)
-		temp_array[array_pos]++;
-	}
-      if(isInside == false)
-	{
-	  for (int pos = 0; pos < num_pixels; pos++)
-		  outer_array[pos] += temp_array[pos];
-	}
-    }
+
+      for(int iter = 0; iter < MAXITER; iter++) {
+		  if((Z_re*Z_re + Z_im*Z_im) > 4) {
+			  isInside = false;
+			  break;
+		  }
+
+		  double Z_im2 = Z_im*Z_im;
+		  Z_im = 2*Z_re*Z_im+c_im;
+		  Z_re= Z_re*Z_re-Z_im2+c_re;
+
+		  int point = height * (MaxIm - Z_im) / Im_factor + (Z_re - MinRe) / Re_factor;
+		  int reflect = height * (MaxIm - Z_im) / Im_factor + (width - 1) - (Z_re - MinRe) / Re_factor;
+		  if (point >= 0 && point < num_pixels) {
+			temp_array[point]++;
+			// temp_array[reflect]++;
+		  }
+	  }
+
+      if(isInside == false) {
+		  for (int pos = 0; pos < num_pixels; pos++)
+			  outer_array[pos] += temp_array[pos];
+	  }
+  }
+
   delete [] temp_array;
-  double max;
+  delete [] mandel_set;
+  double max = outer_array[0];
   #pragma omp parallel for
-  for(int i = 0; i < num_pixels; i++)
-    {
-      if(i == 0)
-	{
-	  max = outer_array[0];
-	  continue;
-	}
+  for(int i = 1; i < num_pixels; i++) {
       if(outer_array[i] > max)
-	{
-	  max = outer_array[i];
-	}
-    }
+		max = outer_array[i];
+  }
+
   #pragma omp parallel for
-  for(int k = 0; k < num_pixels; k++)
-    {
+  for(int k = 0; k < num_pixels; k++) {
       m_bitmap[k*4] = (outer_array[k]/max)*255;
       m_bitmap[k*4 + 1] = (outer_array[k]/max)*255;
       m_bitmap[k*4 + 2] = (outer_array[k]/max)*255;
       m_bitmap[k*4 + 3] = 255;
-    }
+  }
+
   delete [] outer_array;
 }
-   
-	// Real (-2.5, 1)
-	// Imaginary (-1, 1)
-    
-    // Initialize a bucket array (one integer for each pixel) (this is the outer bucket array)
-
-    // iterate over the following several thousand times (at least more times than # of pixels)
-  
-        // Create a temporary bucket array (one integer for each pixel
-        //
-        // Let C be a random point in the complex plane
-        //
-        // Trace the orbit of C, incrementing the temporary bucket that z falls in for each iteration
-        // If Z is in the mandelbrot set, discard the temporary bucket
-        // Else, merge the temporary bucket with the outer bucket array
-        
-
-     // Normalize the global bucket array by dividing each value by the maximum value
-     // Color each pixel however you wish
-     //
-     // Parallelizing this function is tricky. It helps to have a list of temporary bucket arrays
-     // Which are merged after the computation has finished.
-     
-     // Parallelizing is not required, but will save you a lot of time.
-     
-
-
-    
-
