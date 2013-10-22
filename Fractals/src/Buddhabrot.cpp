@@ -23,7 +23,7 @@ void Buddhabrot::gen_fractal()
   int * temp_array;
   temp_array = new int[num_pixels];
   #pragma omp parallel for
-  for(int i = 0; i < (10*num_pixels); i++)
+  for(int i = 0; i < (2*num_pixels); i++)
     {
       for (int bucket = 0; bucket < num_pixels; bucket++)
 	{
@@ -50,7 +50,6 @@ void Buddhabrot::gen_fractal()
 	    }
 	  Z_im = 2*Z_re*Z_im+c_im;
 	  Z_re= Z_re2-Z_im2+c_re;
-	  temp_array[(a+b)]++;
 	  int array_pos = height * (MaxIm - Z_im) / Im_factor + (Z_re - MinRe) / Re_factor;
 	  if (array_pos >= 0 && array_pos < num_pixels)
 		temp_array[array_pos]++;
@@ -79,7 +78,7 @@ void Buddhabrot::gen_fractal()
 	}
     }
   #pragma omp parallel for
-  for(int i = 0; i < num_pixels; i++)
+  for(int k = 0; k < num_pixels; k++)
     {
       m_bitmap[k*4] = (outer_array[k]/max)*255;
       m_bitmap[k*4 + 1] = (outer_array[k]/max)*255;
